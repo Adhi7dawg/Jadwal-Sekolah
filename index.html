@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#EECAA6" />
+  <title>Jadwal &amp; Jurnal Harian</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="mode-login">
+  <!-- Layar sementara saat mengecek status login -->
+  <div id="viewMuat" class="splash"><span class="spinner"></span>Memuat...</div>
+
+  <!-- ================= LAYAR LOGIN ================= -->
+  <section id="viewLogin" class="login" hidden>
+    <div class="card login-card">
+      <div class="login-logo"><span class="ico" data-icon="lock"></span></div>
+      <h1>Jadwal &amp; Jurnal</h1>
+      <p class="muted">Masuk dulu untuk melihat jadwal dan jurnalmu.</p>
+      <form id="formLogin" novalidate>
+        <label>Email
+          <input type="email" id="inEmail" autocomplete="username" inputmode="email" placeholder="nama@email.com" required />
+        </label>
+        <label>Kata sandi
+          <input type="password" id="inPassword" autocomplete="current-password" placeholder="Kata sandi" required />
+        </label>
+        <p id="pesanLogin" class="error" hidden></p>
+        <button type="submit" id="btnLogin" class="btn block">Masuk</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= APLIKASI (tampil setelah login) ================= -->
+  <div id="app" hidden>
+    <!-- Header + navigasi (navigasi pindah ke bawah layar di HP) -->
+    <header class="topbar">
+      <div class="brand"><span class="ico" data-icon="book"></span><span>Jadwal &amp; Jurnal</span></div>
+      <nav class="nav" aria-label="Menu utama">
+        <button class="nav-btn active" data-page="jadwal" aria-current="page"><span class="ico" data-icon="calendar"></span><span>Jadwal</span></button>
+        <button class="nav-btn" data-page="jurnal"><span class="ico" data-icon="book"></span><span>Jurnal</span></button>
+        <button class="nav-btn" data-page="profil"><span class="ico" data-icon="user"></span><span>Profil</span></button>
+      </nav>
+    </header>
+
+    <main>
+      <div id="banner" class="banner" role="alert" hidden></div>
+
+      <!-- ================= HALAMAN JADWAL (BERANDA) ================= -->
+      <section id="page-jadwal" class="page active">
+        <div class="hero">
+          <p class="hero-kecil" id="tanggalHariIni"></p>
+          <h1 id="sapaan">Halo!</h1>
+          <button id="ajakNama" class="link-btn" data-goto="profil" hidden>Isi namamu di menu Profil →</button>
+        </div>
+
+        <div class="tabs" id="tabsHari" role="tablist" aria-label="Pilih hari"></div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 id="judulHari">Senin</h2>
+              <p class="muted" id="infoHari"></p>
+            </div>
+            <button id="btnTambahMapel" class="btn small"><span class="ico" data-icon="plus"></span>Tambah</button>
+          </div>
+          <ul id="listPelajaran" class="list"></ul>
+        </div>
+      </section>
+
+      <!-- ================= HALAMAN JURNAL ================= -->
+      <section id="page-jurnal" class="page">
+        <div class="card">
+          <h2 id="judulFormJurnal">Catat Jurnal Belajar</h2>
+          <form id="formJurnal" novalidate>
+            <label>Tanggal
+              <input type="date" id="inTanggal" required />
+            </label>
+            <label>Mata pelajaran
+              <select id="selMapel" required></select>
+            </label>
+            <div class="grid2">
+              <label>Guru
+                <input type="text" id="inGuru" maxlength="60" placeholder="Nama guru" required />
+              </label>
+              <label>Jam ke-
+                <input type="number" id="inJam" min="1" max="12" inputmode="numeric" placeholder="1" required />
+              </label>
+            </div>
+            <label>Topik utama
+              <textarea id="inTopik" rows="3" maxlength="300" placeholder="Apa yang dipelajari hari ini?" required></textarea>
+            </label>
+            <p id="pesanForm" class="error" hidden></p>
+            <div class="row">
+              <button type="button" id="btnBatalEdit" class="btn ghost" hidden>Batal</button>
+              <button type="submit" id="btnSimpanJurnal" class="btn">Simpan Jurnal</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <h2>Daftar Jurnal</h2>
+            <span class="badge" id="jumlahJurnal">0</span>
+          </div>
+          <div class="grid2 filter">
+            <label>Filter tanggal
+              <input type="date" id="inFilterTanggal" />
+            </label>
+            <label>Filter pelajaran
+              <select id="selFilterMapel"></select>
+            </label>
+          </div>
+          <button id="btnResetFilter" class="link-btn" type="button">Reset filter</button>
+          <ul id="listJurnal" class="list"></ul>
+        </div>
+      </section>
+
+      <!-- ================= HALAMAN PROFIL ================= -->
+      <section id="page-profil" class="page">
+        <div class="card">
+          <h2>Profil</h2>
+          <p class="muted">Nama ini dipakai untuk sapaan di beranda.</p>
+          <form id="formProfil" novalidate>
+            <label>Nama
+              <input type="text" id="inNama" maxlength="30" placeholder="Nama kamu" required />
+            </label>
+            <p id="pesanProfil" class="error" hidden></p>
+            <button type="submit" class="btn" id="btnSimpanProfil">Simpan Nama</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Akun</h2>
+          <p class="muted">Keluar dari akun di perangkat ini.</p>
+          <button type="button" id="btnKeluar" class="btn ghost block mt"><span class="ico" data-icon="logout"></span>Keluar</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Dialog tambah/ubah mata pelajaran -->
+  <dialog id="dlgMapel">
+    <form id="formMapel" novalidate>
+      <h3 id="dlgJudul">Tambah Mata Pelajaran</h3>
+      <label>Nama mata pelajaran
+        <input type="text" id="inMapel" maxlength="40" placeholder="Contoh: Koding" required />
+      </label>
+      <p id="dlgError" class="error" hidden></p>
+      <div class="row">
+        <button type="button" id="dlgBatal" class="btn ghost">Batal</button>
+        <button type="submit" class="btn">Simpan</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
