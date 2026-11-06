@@ -1,163 +1,624 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#EECAA6" />
-  <title>Jadwal &amp; Jurnal Harian</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>♟️ Catur Sederhana · #EECAA6</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: #dbbd9a; /* latar lebih gelap dari #EECAA6 agar kontras lembut */
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      padding: 16px;
+    }
+
+    .game-container {
+      background: #EECAA6; /* warna utama */
+      padding: 24px 24px 28px 24px;
+      border-radius: 48px 48px 32px 32px;
+      box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      font-weight: 500;
+      font-size: 1.9rem;
+      letter-spacing: 1px;
+      color: #4b3a2b;
+      text-shadow: 2px 2px 0 rgba(255, 245, 235, 0.8);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 span {
+      background: #f5e1cf;
+      padding: 4px 14px;
+      border-radius: 60px;
+      font-size: 1.1rem;
+      box-shadow: inset -1px -1px 3px rgba(0,0,0,0.1), inset 2px 2px 5px #fff8f0;
+      color: #4b3a2b;
+    }
+
+    .board-wrapper {
+      background: #c7a17e; /* kayu tua */
+      padding: 14px;
+      border-radius: 36px;
+      box-shadow: inset 0 0 0 2px #b38b64, 0 10px 18px rgba(0,0,0,0.25);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      width: min(70vw, 70vh, 520px);
+      height: min(70vw, 70vh, 520px);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 0 3px #9c7a58, 0 6px 12px rgba(0,0,0,0.3);
+    }
+
+    .square {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: min(9vw, 9vh, 56px);
+      line-height: 1;
+      cursor: pointer;
+      transition: background 0.1s, transform 0.1s;
+      aspect-ratio: 1 / 1;
+      font-family: 'Segoe UI', 'Apple Symbols', 'Noto Sans Symbols', 'Arial Unicode MS', sans-serif;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* warna papan: terang dan gelap dengan nuansa #EECAA6 */
+    .light {
+      background: #f7e5d3; /* krem lembut */
+    }
+
+    .dark {
+      background: #b68f6b; /* cokelat susu */
+    }
+
+    /* highlight untuk langkah legal */
+    .highlight {
+      background: #f3d37c !important;
+      box-shadow: inset 0 0 0 4px #f7e9b0;
+    }
+
+    .selected {
+      background: #e6c28c !important;
+      box-shadow: inset 0 0 0 4px #fffaec, inset 0 0 0 6px #ac8b60;
+    }
+
+    /* bidak putih dan hitam */
+    .white-piece {
+      color: #fefefe;
+      text-shadow: 1px 1px 0 #8a7a6a, 2px 2px 3px rgba(0,0,0,0.4);
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+    }
+
+    .black-piece {
+      color: #2f2a24;
+      text-shadow: 1px 1px 0 #c7b09b, 2px 2px 3px rgba(0,0,0,0.4);
+      filter: drop-shadow(0 1px 1px rgba(255,255,200,0.3));
+    }
+
+    .status {
+      margin-top: 22px;
+      background: #f7e4d1;
+      padding: 12px 28px;
+      border-radius: 60px;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #3e2e1f;
+      box-shadow: inset -2px -2px 6px #b39272, inset 3px 3px 8px #fffbf4, 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      min-width: 200px;
+      letter-spacing: 0.3px;
+    }
+
+    .reset-btn {
+      margin-top: 18px;
+      background: #4f3f2f;
+      border: none;
+      color: #f7e4d1;
+      font-size: 1.1rem;
+      font-weight: 500;
+      padding: 12px 36px;
+      border-radius: 60px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #2e231a, 0 8px 14px rgba(0,0,0,0.25);
+      transition: all 0.08s ease;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .reset-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #2e231a, 0 8px 14px rgba(0,0,0,0.2);
+    }
+
+    /* responsif */
+    @media (max-width: 520px) {
+      .game-container {
+        padding: 16px 16px 20px;
+        border-radius: 32px;
+      }
+      h2 {
+        font-size: 1.5rem;
+      }
+      .status {
+        font-size: 1rem;
+        padding: 8px 18px;
+      }
+      .reset-btn {
+        padding: 10px 28px;
+        font-size: 1rem;
+      }
+    }
+  </style>
 </head>
-<body class="mode-login">
-  <!-- Layar sementara saat mengecek status login -->
-  <div id="viewMuat" class="splash"><span class="spinner"></span>Memuat...</div>
+<body>
+  <div class="game-container">
+    <h2>♟️ CATUR <span>#EECAA6</span></h2>
 
-  <!-- ================= LAYAR LOGIN ================= -->
-  <section id="viewLogin" class="login" hidden>
-    <div class="card login-card">
-      <div class="login-logo"><span class="ico" data-icon="lock"></span></div>
-      <h1>Jadwal &amp; Jurnal</h1>
-      <p class="muted">Masuk dulu untuk melihat jadwal dan jurnalmu.</p>
-      <form id="formLogin" novalidate>
-        <label>Email
-          <input type="email" id="inEmail" autocomplete="username" inputmode="email" placeholder="nama@email.com" required />
-        </label>
-        <label>Kata sandi
-          <input type="password" id="inPassword" autocomplete="current-password" placeholder="Kata sandi" required />
-        </label>
-        <p id="pesanLogin" class="error" hidden></p>
-        <button type="submit" id="btnLogin" class="btn block">Masuk</button>
-      </form>
+    <div class="board-wrapper">
+      <div class="board" id="board"></div>
     </div>
-  </section>
 
-  <!-- ================= APLIKASI (tampil setelah login) ================= -->
-  <div id="app" hidden>
-    <!-- Header + navigasi (navigasi pindah ke bawah layar di HP) -->
-    <header class="topbar">
-      <div class="brand"><span class="ico" data-icon="book"></span><span>Jadwal &amp; Jurnal</span></div>
-      <nav class="nav" aria-label="Menu utama">
-        <button class="nav-btn active" data-page="jadwal" aria-current="page"><span class="ico" data-icon="calendar"></span><span>Jadwal</span></button>
-        <button class="nav-btn" data-page="jurnal"><span class="ico" data-icon="book"></span><span>Jurnal</span></button>
-        <button class="nav-btn" data-page="profil"><span class="ico" data-icon="user"></span><span>Profil</span></button>
-      </nav>
-    </header>
-
-    <main>
-      <div id="banner" class="banner" role="alert" hidden></div>
-
-      <!-- ================= HALAMAN JADWAL (BERANDA) ================= -->
-      <section id="page-jadwal" class="page active">
-        <div class="hero">
-          <p class="hero-kecil" id="tanggalHariIni"></p>
-          <h1 id="sapaan">Halo!</h1>
-          <button id="ajakNama" class="link-btn" data-goto="profil" hidden>Isi namamu di menu Profil →</button>
-        </div>
-
-        <div class="tabs" id="tabsHari" role="tablist" aria-label="Pilih hari"></div>
-
-        <div class="card">
-          <div class="card-head">
-            <div>
-              <h2 id="judulHari">Senin</h2>
-              <p class="muted" id="infoHari"></p>
-            </div>
-            <button id="btnTambahMapel" class="btn small"><span class="ico" data-icon="plus"></span>Tambah</button>
-          </div>
-          <ul id="listPelajaran" class="list"></ul>
-        </div>
-      </section>
-
-      <!-- ================= HALAMAN JURNAL ================= -->
-      <section id="page-jurnal" class="page">
-        <div class="card">
-          <h2 id="judulFormJurnal">Catat Jurnal Belajar</h2>
-          <form id="formJurnal" novalidate>
-            <label>Tanggal
-              <input type="date" id="inTanggal" required />
-            </label>
-            <label>Mata pelajaran
-              <select id="selMapel" required></select>
-            </label>
-            <div class="grid2">
-              <label>Guru
-                <input type="text" id="inGuru" maxlength="60" placeholder="Nama guru" required />
-              </label>
-              <label>Jam ke-
-                <input type="number" id="inJam" min="1" max="12" inputmode="numeric" placeholder="1" required />
-              </label>
-            </div>
-            <label>Topik utama
-              <textarea id="inTopik" rows="3" maxlength="300" placeholder="Apa yang dipelajari hari ini?" required></textarea>
-            </label>
-            <p id="pesanForm" class="error" hidden></p>
-            <div class="row">
-              <button type="button" id="btnBatalEdit" class="btn ghost" hidden>Batal</button>
-              <button type="submit" id="btnSimpanJurnal" class="btn">Simpan Jurnal</button>
-            </div>
-          </form>
-        </div>
-
-        <div class="card">
-          <div class="card-head">
-            <h2>Daftar Jurnal</h2>
-            <span class="badge" id="jumlahJurnal">0</span>
-          </div>
-          <div class="grid2 filter">
-            <label>Filter tanggal
-              <input type="date" id="inFilterTanggal" />
-            </label>
-            <label>Filter pelajaran
-              <select id="selFilterMapel"></select>
-            </label>
-          </div>
-          <button id="btnResetFilter" class="link-btn" type="button">Reset filter</button>
-          <ul id="listJurnal" class="list"></ul>
-        </div>
-      </section>
-
-      <!-- ================= HALAMAN PROFIL ================= -->
-      <section id="page-profil" class="page">
-        <div class="card">
-          <h2>Profil</h2>
-          <p class="muted">Nama ini dipakai untuk sapaan di beranda.</p>
-          <form id="formProfil" novalidate>
-            <label>Nama
-              <input type="text" id="inNama" maxlength="30" placeholder="Nama kamu" required />
-            </label>
-            <p id="pesanProfil" class="error" hidden></p>
-            <button type="submit" class="btn" id="btnSimpanProfil">Simpan Nama</button>
-          </form>
-        </div>
-
-        <div class="card">
-          <h2>Akun</h2>
-          <p class="muted">Keluar dari akun di perangkat ini.</p>
-          <button type="button" id="btnKeluar" class="btn ghost block mt"><span class="ico" data-icon="logout"></span>Keluar</button>
-        </div>
-      </section>
-    </main>
+    <div class="status" id="status">Giliran Putih ♙</div>
+    <button class="reset-btn" id="resetBtn">⟳ Main Lagi</button>
   </div>
 
-  <!-- Dialog tambah/ubah mata pelajaran -->
-  <dialog id="dlgMapel">
-    <form id="formMapel" novalidate>
-      <h3 id="dlgJudul">Tambah Mata Pelajaran</h3>
-      <label>Nama mata pelajaran
-        <input type="text" id="inMapel" maxlength="40" placeholder="Contoh: Koding" required />
-      </label>
-      <p id="dlgError" class="error" hidden></p>
-      <div class="row">
-        <button type="button" id="dlgBatal" class="btn ghost">Batal</button>
-        <button type="submit" class="btn">Simpan</button>
-      </div>
-    </form>
-  </dialog>
+  <script>
+    (function() {
+      // ---------- KONSTANTA & STATE ----------
+      const boardEl = document.getElementById('board');
+      const statusEl = document.getElementById('status');
+      const resetBtn = document.getElementById('resetBtn');
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+      // Unicode bidak catur
+      const PIECES = {
+        white: {
+          king: '♔',
+          queen: '♕',
+          rook: '♖',
+          bishop: '♗',
+          knight: '♘',
+          pawn: '♙'
+        },
+        black: {
+          king: '♚',
+          queen: '♛',
+          rook: '♜',
+          bishop: '♝',
+          knight: '♞',
+          pawn: '♟'
+        }
+      };
 
-  <script type="module" src="script.js"></script>
-</body>
-</html>
+      // Representasi papan: 8x8, null = kosong.
+      // Setiap bidak: { type, color }
+      let board = [];
+      let selectedSquare = null;       // { row, col }
+      let legalMoves = [];            // array { row, col }
+      let turn = 'white';            // 'white' atau 'black'
+      let gameOver = false;
+
+      // ---------- INISIALISASI PAPAN ----------
+      function initBoard() {
+        // Papan kosong 8x8
+        board = Array(8).fill().map(() => Array(8).fill(null));
+
+        // Hitam (baris 0 dan 1)
+        const blackBackRank = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+        for (let col = 0; col < 8; col++) {
+          board[0][col] = { type: blackBackRank[col], color: 'black' };
+          board[1][col] = { type: 'pawn', color: 'black' };
+        }
+
+        // Putih (baris 6 dan 7)
+        const whiteBackRank = ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook'];
+        for (let col = 0; col < 8; col++) {
+          board[6][col] = { type: 'pawn', color: 'white' };
+          board[7][col] = { type: whiteBackRank[col], color: 'white' };
+        }
+
+        // Reset state
+        selectedSquare = null;
+        legalMoves = [];
+        turn = 'white';
+        gameOver = false;
+        updateStatus();
+        renderBoard();
+      }
+
+      // ---------- RENDER PAPAN ----------
+      function renderBoard() {
+        boardEl.innerHTML = '';
+        for (let row = 0; row < 8; row++) {
+          for (let col = 0; col < 8; col++) {
+            const square = document.createElement('div');
+            square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+            square.dataset.row = row;
+            square.dataset.col = col;
+
+            // Tandai jika kotak adalah langkah legal
+            if (legalMoves.some(m => m.row === row && m.col === col)) {
+              square.classList.add('highlight');
+            }
+
+            // Tandai jika kotak terpilih
+            if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
+              square.classList.add('selected');
+            }
+
+            const piece = board[row][col];
+            if (piece) {
+              const span = document.createElement('span');
+              span.textContent = PIECES[piece.color][piece.type];
+              span.className = piece.color === 'white' ? 'white-piece' : 'black-piece';
+              square.appendChild(span);
+            }
+
+            square.addEventListener('click', () => onSquareClick(row, col));
+            boardEl.appendChild(square);
+          }
+        }
+      }
+
+      // ---------- UPDATE STATUS ----------
+      function updateStatus() {
+        if (gameOver) return;
+        const giliran = turn === 'white' ? 'Putih ♙' : 'Hitam ♟';
+        statusEl.textContent = `Giliran ${giliran}`;
+      }
+
+      // ---------- LOGIKA BIDAK (VALIDASI LANGKAH) ----------
+      function isInside(row, col) {
+        return row >= 0 && row < 8 && col >= 0 && col < 8;
+      }
+
+      // Mendapatkan semua langkah legal (tanpa cek skak mat)
+      function getLegalMoves(row, col) {
+        const piece = board[row][col];
+        if (!piece) return [];
+
+        const moves = [];
+        const { type, color } = piece;
+        const direction = color === 'white' ? -1 : 1; // putih maju ke atas (row berkurang)
+
+        // Fungsi bantu untuk menambahkan langkah jika valid
+        const addMove = (r, c, condition = true) => {
+          if (!isInside(r, c)) return false;
+          const target = board[r][c];
+          if (!condition) return false;
+          if (target && target.color === color) return false; // tidak bisa makan kawan sendiri
+          moves.push({ row: r, col: c });
+          return true;
+        };
+
+        // ---------- PION ----------
+        if (type === 'pawn') {
+          // Maju satu
+          const forwardRow = row + direction;
+          if (isInside(forwardRow, col) && board[forwardRow][col] === null) {
+            moves.push({ row: forwardRow, col });
+
+            // Maju dua langkah dari posisi awal
+            const startRow = color === 'white' ? 6 : 1;
+            if (row === startRow) {
+              const forwardTwoRow = row + 2 * direction;
+              if (isInside(forwardTwoRow, col) && board[forwardTwoRow][col] === null) {
+                moves.push({ row: forwardTwoRow, col });
+              }
+            }
+          }
+
+          // Makan diagonal
+          const captureCols = [col - 1, col + 1];
+          for (const c of captureCols) {
+            if (isInside(forwardRow, c)) {
+              const target = board[forwardRow][c];
+              if (target && target.color !== color) {
+                moves.push({ row: forwardRow, col: c });
+              }
+            }
+          }
+        }
+
+        // ---------- KNIGHT (Kuda) ----------
+        if (type === 'knight') {
+          const jumps = [
+            [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+            [1, -2], [1, 2], [2, -1], [2, 1]
+          ];
+          for (const [dr, dc] of jumps) {
+            const nr = row + dr;
+            const nc = col + dc;
+            if (isInside(nr, nc)) {
+              const target = board[nr][nc];
+              if (!target || target.color !== color) {
+                moves.push({ row: nr, col: nc });
+              }
+            }
+          }
+        }
+
+        // ---------- BISHOP (Uskup) ----------
+        if (type === 'bishop') {
+          const dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+          for (const [dr, dc] of dirs) {
+            for (let step = 1; step < 8; step++) {
+              const nr = row + dr * step;
+              const nc = col + dc * step;
+              if (!isInside(nr, nc)) break;
+              const target = board[nr][nc];
+              if (!target) {
+                moves.push({ row: nr, col: nc });
+              } else {
+                if (target.color !== color) moves.push({ row: nr, col: nc });
+                break; // terhalang
+              }
+            }
+          }
+        }
+
+        // ---------- ROOK (Benteng) ----------
+        if (type === 'rook') {
+          const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+          for (const [dr, dc] of dirs) {
+            for (let step = 1; step < 8; step++) {
+              const nr = row + dr * step;
+              const nc = col + dc * step;
+              if (!isInside(nr, nc)) break;
+              const target = board[nr][nc];
+              if (!target) {
+                moves.push({ row: nr, col: nc });
+              } else {
+                if (target.color !== color) moves.push({ row: nr, col: nc });
+                break;
+              }
+            }
+          }
+        }
+
+        // ---------- QUEEN (Ratu) ----------
+        if (type === 'queen') {
+          const dirs = [
+            [-1, -1], [-1, 0], [-1, 1],
+            [0, -1],           [0, 1],
+            [1, -1], [1, 0], [1, 1]
+          ];
+          for (const [dr, dc] of dirs) {
+            for (let step = 1; step < 8; step++) {
+              const nr = row + dr * step;
+              const nc = col + dc * step;
+              if (!isInside(nr, nc)) break;
+              const target = board[nr][nc];
+              if (!target) {
+                moves.push({ row: nr, col: nc });
+              } else {
+                if (target.color !== color) moves.push({ row: nr, col: nc });
+                break;
+              }
+            }
+          }
+        }
+
+        // ---------- KING (Raja) ----------
+        if (type === 'king') {
+          const dirs = [
+            [-1, -1], [-1, 0], [-1, 1],
+            [0, -1],           [0, 1],
+            [1, -1], [1, 0], [1, 1]
+          ];
+          for (const [dr, dc] of dirs) {
+            const nr = row + dr;
+            const nc = col + dc;
+            if (isInside(nr, nc)) {
+              const target = board[nr][nc];
+              if (!target || target.color !== color) {
+                moves.push({ row: nr, col: nc });
+              }
+            }
+          }
+        }
+
+        // Hilangkan langkah yang membuat raja sendiri skak (simple: filter langkah yang membuat raja diserang)
+        // Untuk sederhana, kita filter berdasarkan simulasi (tanpa castling, en passant)
+        return moves.filter(move => {
+          // Simulasi langkah
+          const originalPiece = board[move.row][move.col];
+          const movingPiece = board[row][col];
+          board[move.row][move.col] = movingPiece;
+          board[row][col] = null;
+
+          const inCheck = isKingInCheck(color);
+
+          // Kembalikan
+          board[row][col] = movingPiece;
+          board[move.row][move.col] = originalPiece;
+
+          return !inCheck;
+        });
+      }
+
+      // Cek apakah raja dari warna tertentu sedang skak
+      function isKingInCheck(color) {
+        // Cari raja
+        let kingRow = -1, kingCol = -1;
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const piece = board[r][c];
+            if (piece && piece.type === 'king' && piece.color === color) {
+              kingRow = r;
+              kingCol = c;
+              break;
+            }
+          }
+          if (kingRow !== -1) break;
+        }
+        if (kingRow === -1) return false; // tidak ada raja? (seharusnya tidak terjadi)
+
+        // Cek apakah ada bidak lawan yang bisa menyerang raja
+        const opponentColor = color === 'white' ? 'black' : 'white';
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const piece = board[r][c];
+            if (piece && piece.color === opponentColor) {
+              // Dapatkan langkah legal lawan (tanpa filter skak agar tidak rekursif tak berujung)
+              const moves = getRawMoves(r, c, piece, opponentColor);
+              if (moves.some(m => m.row === kingRow && m.col === kingCol)) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }
+
+      // Fungsi langkah mentah tanpa filter skak (untuk cek skak)
+      function getRawMoves(row, col, piece, color) {
+        const moves = [];
+        const { type } = piece;
+        const direction = color === 'white' ? -1 : 1;
+
+        const addIfValid = (r, c) => {
+          if (!isInside(r, c)) return false;
+          const target = board[r][c];
+          if (target && target.color === color) return false;
+          moves.push({ row: r, col: c });
+          return true;
+        };
+
+        if (type === 'pawn') {
+          const forwardRow = row + direction;
+          if (isInside(forwardRow, col) && board[forwardRow][col] === null) {
+            moves.push({ row: forwardRow, col });
+            const startRow = color === 'white' ? 6 : 1;
+            if (row === startRow) {
+              const forwardTwoRow = row + 2 * direction;
+              if (isInside(forwardTwoRow, col) && board[forwardTwoRow][col] === null) {
+                moves.push({ row: forwardTwoRow, col });
+              }
+            }
+          }
+          for (const c of [col - 1, col + 1]) {
+            if (isInside(forwardRow, c)) {
+              const target = board[forwardRow][c];
+              if (target && target.color !== color) moves.push({ row: forwardRow, col: c });
+            }
+          }
+        }
+
+        if (type === 'knight') {
+          const jumps = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+          for (const [dr, dc] of jumps) {
+            const nr = row + dr, nc = col + dc;
+            if (isInside(nr, nc)) {
+              const target = board[nr][nc];
+              if (!target || target.color !== color) moves.push({ row: nr, col: nc });
+            }
+          }
+        }
+
+        if (type === 'bishop' || type === 'rook' || type === 'queen') {
+          let dirs = [];
+          if (type === 'bishop') dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+          else if (type === 'rook') dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+          else if (type === 'queen') dirs = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+          for (const [dr, dc] of dirs) {
+            for (let step = 1; step < 8; step++) {
+              const nr = row + dr * step, nc = col + dc * step;
+              if (!isInside(nr, nc)) break;
+              const target = board[nr][nc];
+              if (!target) {
+                moves.push({ row: nr, col: nc });
+              } else {
+                if (target.color !== color) moves.push({ row: nr, col: nc });
+                break;
+              }
+            }
+          }
+        }
+
+        if (type === 'king') {
+          const dirs = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+          for (const [dr, dc] of dirs) {
+            const nr = row + dr, nc = col + dc;
+            if (isInside(nr, nc)) {
+              const target = board[nr][nc];
+              if (!target || target.color !== color) moves.push({ row: nr, col: nc });
+            }
+          }
+        }
+
+        return moves;
+      }
+
+      // ---------- CEK SKAKMAT / STALEMATE (SEDERHANA) ----------
+      function checkGameOver() {
+        const opponentColor = turn === 'white' ? 'black' : 'white';
+        let hasAnyLegalMove = false;
+
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            const piece = board[r][c];
+            if (piece && piece.color === turn) {
+              const moves = getLegalMoves(r, c);
+              if (moves.length > 0) {
+                hasAnyLegalMove = true;
+                break;
+              }
+            }
+          }
+          if (hasAnyLegalMove) break;
+        }
+
+        if (!hasAnyLegalMove) {
+          gameOver = true;
+          if (isKingInCheck(turn)) {
+            statusEl.textContent = `Skakmat! ${turn === 'white' ? 'Hitam' : 'Putih'} menang! 🏆`;
+          } else {
+            statusEl.textContent = `Stalemate! Seri 🤝`;
+          }
+        }
+      }
+
+      // ---------- HANDLER KLIK KOTAK ----------
+      function onSquareClick(row, col) {
+        if (gameOver) return;
+
+        const piece = board[row][col];
+
+        // Jika ada kotak terpilih sebelumnya
+        if (selectedSquare) {
+          // Jika klik kotak tujuan yang legal
+          if (legalMoves.some(m => m.row === row && m.col === col)) {
+            // Lakukan langkah
+            const fromRow = selectedSquare.row;
+            const fromCol = selectedSquare.col;
+            const movingPiece = board[fromRow][fromCol];
+
+            // Pindahkan bidak
+            board[row][col] = movingPiece;
+            board[fromRow][fromCol] = null;
+
+            // Promosi pion (sederhana
